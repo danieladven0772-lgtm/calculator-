@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#123f37">
+    <meta name="description" content="Kalkulator Yuan dan daftar belanja impor yang bekerja tanpa internet.">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+    <title>Kurs & Belanja Impor</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true">¥</div>
+        <div class="brand-copy"><p class="eyebrow">KALKULATOR BELANJA</p><h1>Kurs & Belanja Impor</h1><p class="subtitle">Hitung cepat. Catatan tetap tersimpan.</p></div>
+        <button id="installButton" class="icon-button install-button" type="button" hidden aria-label="Pasang aplikasi">＋ <span>Pasang</span></button>
+      </header>
+
+      <section class="session-bar card" aria-label="Sesi belanja aktif">
+        <div class="session-current"><span class="status-dot"></span><div><p class="eyebrow">SESI AKTIF</p><h2 id="sessionName">Belanja Baru</h2><p id="sessionMeta" class="muted">0 item</p></div></div>
+        <div class="session-actions"><button id="historyButton" class="button button-quiet" type="button">Riwayat</button><button id="renameButton" class="button button-quiet" type="button">Ubah nama</button><button id="newSessionButton" class="button button-primary" type="button">＋ Sesi baru</button></div>
+      </section>
+
+      <section class="card rate-card" aria-labelledby="rateHeading">
+        <div class="section-heading"><div><p class="eyebrow">KONVERSI</p><h2 id="rateHeading">Atur kurs Yuan</h2></div><span class="rate-chip">CNY → IDR</span></div>
+        <label class="field-label" for="rateInput">1 Yuan = berapa Rupiah?</label>
+        <div class="rate-entry"><span class="prefix">Rp</span><input id="rateInput" inputmode="decimal" autocomplete="off" aria-describedby="rateHelp"><button id="applyRateButton" class="button button-primary" type="button">Terapkan kurs</button></div>
+        <p id="rateHelp" class="field-help">Kurs disimpan per sesi. Nilai seluruh item dihitung ulang saat kurs diubah.</p>
+        <p id="rateError" class="error-text" role="alert" hidden></p>
+      </section>
+
+      <section class="card calculator-card" aria-labelledby="calcHeading">
+        <div class="section-heading"><div><p class="eyebrow">KALKULATOR EKSPRESI CEPAT</p><h2 id="calcHeading">Tambah item belanja</h2></div><span class="calc-badge">01</span></div>
+        <label class="field-label" for="itemName">Nama item</label>
+        <input id="itemName" class="text-input" maxlength="80" placeholder="Contoh: Board PD" autocomplete="off">
+        <label class="field-label expression-label" for="expressionInput">Ekspresi harga dalam Yuan</label>
+        <input id="expressionInput" class="text-input expression-input" inputmode="decimal" placeholder="17+28+29" autocomplete="off" aria-describedby="expressionHelp">
+        <p id="expressionHelp" class="field-help">Bisa pakai + − × ÷, desimal titik, dan tanda kurung.</p>
+        <div class="calc-tools"><button id="backspaceButton" class="button button-outline" type="button">⌫ <span>Hapus karakter</span></button><button id="clearInputButton" class="button button-outline" type="button">Bersihkan input</button></div>
+        <div id="previewBox" class="preview-box" hidden aria-live="polite"><span>Hasil sementara</span><strong id="previewValue"></strong></div>
+        <p id="expressionError" class="error-text" role="alert" hidden></p>
+        <button id="addItemButton" class="button button-add" type="button">＋ Tambahkan ke Daftar Belanja</button>
+      </section>
+
+      <section class="list-section" aria-labelledby="listHeading">
+        <div class="list-heading"><div><p class="eyebrow">DAFTAR ITEM</p><h2 id="listHeading">Belanja Anda <span id="itemCount" class="count-pill">0</span></h2></div><button id="clearAllButton" class="button button-danger-quiet" type="button">Hapus semua</button></div>
+        <div id="emptyState" class="empty-state card"><div class="empty-icon" aria-hidden="true">＋</div><h3>Daftar masih kosong</h3><p>Tambahkan item pertama menggunakan kalkulator di atas.</p></div>
+        <div id="itemList" class="item-list" aria-live="polite"></div>
+      </section>
+
+      <section class="total-card" aria-label="Ringkasan total belanja">
+        <div class="total-top"><div><p class="eyebrow">RINGKASAN BELANJA IMPOR</p><h2>Total belanja</h2></div><span class="total-count" id="totalCount">0 item</span></div>
+        <div class="total-amounts"><div><span>Total Yuan</span><strong id="totalYuan">¥0</strong></div><div class="total-divider"></div><div><span>Total Rupiah</span><strong id="totalRupiah">Rp0</strong></div></div>
+        <p id="summaryRate" class="summary-rate">Kurs 1 CNY = Rp2.700</p>
+        <div class="summary-actions"><button id="copyButton" class="button button-light" type="button">▣ Salin ringkasan</button><button id="exportButton" class="button button-translucent" type="button">↓ Ekspor TXT</button></div>
+      </section>
+      <footer>Data tersimpan di perangkat ini · Bisa digunakan tanpa internet</footer>
+    </main>
+
+    <dialog id="sessionsDialog" class="dialog"><form method="dialog" class="dialog-card"><div class="dialog-heading"><div><p class="eyebrow">RIWAYAT</p><h2>Sesi belanja</h2></div><button class="dialog-close" value="cancel" aria-label="Tutup">×</button></div><div id="sessionList" class="session-list"></div><div class="dialog-footer"><button class="button button-outline" value="cancel">Tutup</button><button id="dialogNewSession" class="button button-primary" type="button">＋ Sesi baru</button></div></form></dialog>
+
+    <dialog id="nameDialog" class="dialog"><form id="nameForm" class="dialog-card"><div class="dialog-heading"><div><p class="eyebrow" id="nameDialogEyebrow">SESI BELANJA</p><h2 id="nameDialogTitle">Nama sesi</h2></div><button class="dialog-close" type="button" data-close-name aria-label="Tutup">×</button></div><label class="field-label" for="sessionNameInput">Nama sesi</label><input id="sessionNameInput" class="text-input" maxlength="60" placeholder="Mis. Order Board PD" autocomplete="off"><p id="nameError" class="error-text" role="alert" hidden></p><div class="dialog-footer"><button class="button button-outline" type="button" data-close-name>Batal</button><button class="button button-primary" type="submit">Simpan</button></div></form></dialog>
+
+    <dialog id="confirmDialog" class="dialog"><form id="confirmForm" class="dialog-card"><div class="dialog-heading"><div><p class="eyebrow">KONFIRMASI</p><h2 id="confirmTitle">Hapus item?</h2></div><button class="dialog-close" type="button" data-close-confirm aria-label="Tutup">×</button></div><p id="confirmMessage" class="dialog-message"></p><div class="dialog-footer"><button class="button button-outline" type="button" data-close-confirm>Batal</button><button id="confirmAction" class="button button-danger" type="submit">Hapus</button></div></form></dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js" defer></script>
+  </body>
+</html>
+s
